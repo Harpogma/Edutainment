@@ -20,6 +20,8 @@ struct ContentView: View {
     @State private var answerCorrect: Bool
     @State private var gameIsOn: Bool = false
     @State private var questionCount = 1
+    @State private var generatedRandomNumberToCheckAgainst: Int = 0
+    @State private var isAnswerChecked: Bool = false
     
     @FocusState private var isFocused: Bool
     
@@ -87,18 +89,31 @@ struct ContentView: View {
                                             .cornerRadius(10)
                                             .keyboardType(.decimalPad)
                                             .focused($isFocused)
-                                        answerCorrect ? Image(systemName: "checkmark") : Image(systemName: "xmark.app")
+                                        if isAnswerChecked {
+                                            answerCorrect ?
+                                            Image(systemName: "checkmark").foregroundColor(.green) :
+                                            Image(systemName: "xmark.app").foregroundColor(.red)
+                                        }
                                     }
-                                    Button(action: {
-                                        self.isAnswerCorrect()
-                                        self.isFocused = false
-                                        self.questionCount += 1
-                                        self.question = generateQuestion()
-                                    }, label: {
-                                        Text("Check answer")
-                                    })
-                                    .buttonStyle(.borderedProminent)
-                                    
+                                    if isAnswerChecked {
+                                        Button(action: {
+                                            self.questionCount += 1
+                                            self.question = generateQuestion()
+                                            self.isAnswerChecked = false
+                                        }, label: {
+                                            Text("Next question")
+                                        })
+                                        .buttonStyle(.borderedProminent)
+                                    } else {
+                                        Button(action: {
+                                            self.isAnswerCorrect()
+                                            self.isFocused = false
+                                            self.isAnswerChecked = true
+                                        }, label: {
+                                            Text("Check answer")
+                                        })
+                                        .buttonStyle(.borderedProminent)
+                                    }
                                 }
                                 .frame(width: 200, height: 250)
                                 .background(LinearGradient(colors: [.black, .yellow, .yellow, .black], startPoint: .topLeading, endPoint: .bottomTrailing))
@@ -118,7 +133,7 @@ struct ContentView: View {
     }
     
     func isAnswerCorrect() {
-        if answer == ((multiplicationTable + 2) * generateRandomNumber()) {
+        if answer == ((multiplicationTable + 2) * generatedRandomNumberToCheckAgainst) {
             score += 1
             answerCorrect = true
         } else {
@@ -127,7 +142,9 @@ struct ContentView: View {
     }
     
     func generateRandomNumber() -> Int {
-        return Int.random(in: 0...12)
+        let randomNumber = Int.random(in: 0...12)
+        generatedRandomNumberToCheckAgainst = randomNumber
+        return randomNumber
     }
     
     func generateQuestion() -> String {
