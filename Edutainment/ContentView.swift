@@ -12,14 +12,21 @@ struct ContentView: View {
     let possibleNumberOfQuestion = [5, 10, 20]
     
     // MARK: State variables
-    @State private var textAnswer = ""
+    @State private var question: String
     @State private var multiplicationTable: Int = 1
     @State private var numberOfQuestion = 5
     @State private var answer: Int = 0
     @State private var score = 0
-    @State private var answerCorrect: Bool = false
+    @State private var answerCorrect: Bool
+    @State private var gameIsOn: Bool = false
+    @State private var questionCount = 1
     
     @FocusState private var isFocused: Bool
+    
+    public init() {
+        self.question = ""
+        self.answerCorrect = false
+    }
     
     var body: some View {
         NavigationStack {
@@ -31,6 +38,7 @@ struct ContentView: View {
                         }
                     }
                     .pickerStyle(.navigationLink)
+                
                 }
                 Section("Number of question") {
                     Picker("Select a value", selection: $numberOfQuestion) {
@@ -41,84 +49,75 @@ struct ContentView: View {
                     .pickerStyle(SegmentedPickerStyle())
                 }
                 
-                Spacer()
-                HStack {
-                    Spacer()
-                    
-                    VStack(alignment: .center ,spacing: 15) {
-                        Text(askQuestion(firstNumber: (multiplicationTable + 2), secondNumber: generateRandomNumber()))
-                            .font(.title)
-                        Text("=")
-                            .font(.title)
-                        HStack {
-                            TextField("Your answer", value: $answer, format: .number)
-                                .background(Color.white)
-                                .frame(width: 40)
-                                .cornerRadius(10)
-                                .keyboardType(.decimalPad)
-                                .focused($isFocused)
-                            answerCorrect ? Image(systemName: "checkmark") : Image(systemName: "xmark.app")
-                        }
-                        Button(action: {
-                            withAnimation {
-                                answerCorrect = true
-                            }
-                            isFocused = false
-                        }, label: {
-                            Text("Verif")
-                        })
-                        .buttonStyle(.borderedProminent)
-                        
-
-                    }
-                    .frame(width: 200, height: 250)
-                    .background(LinearGradient(colors: [.pink, .purple, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .clipShape(.rect(cornerRadius: 20))
-                    
-                    Spacer()
-                }
                 
-//                Section("Questions") {
-//                    ForEach(0..<numberOfQuestion, id: \.self) { number in
-//                        HStack {
-//                            Spacer()
-//                            Text(askQuestion(firstNumber: (multiplicationTable + 2), secondNumber: generateRandomNumber()))
-//                                .frame(maxWidth: 50)
-//                            Spacer()
-//                            Text("=")
-//                            Spacer()
-//                            TextField("Your answer", value: $answer, format: .number)
-//                                .frame(width: 50)
-//                                .textFieldStyle(.roundedBorder)
-//                                .keyboardType(.numberPad)
-//                            Spacer()
-//                            isAnswerCorrect(answer: answer, firstNumber: (multiplicationTable + 2), secondNunber: generateRandomNumber()) ? Image(systemName: "checkmark") : Image(systemName: "xmark.app")
-//                        }
-//                    }
-//                }
             }
             .listStyle(.plain)
-            .toolbar {
-                Button("Start game", action: startGame)
+            VStack {
+                if !gameIsOn {
+                    HStack {
+                        Spacer()
+                        Button {
+                            withAnimation {
+                                gameIsOn.toggle()
+                                self.question = generateQuestion()
+                            }
+                        } label: {
+                            Text("Start game")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        Spacer()
+                    }
+                } else {
+                    VStack {
+                        Text("Question n° \(questionCount)")
+                        
+                        HStack {
+                            Spacer()
+                            
+                            VStack(alignment: .center ,spacing: 15) {
+                                Text(question)
+                                    .font(.title)
+                                Text("=")
+                                    .font(.title)
+                                HStack {
+                                    TextField("Your answer", value: $answer, format: .number)
+                                        .background(Color.white)
+                                        .frame(width: 40)
+                                        .cornerRadius(10)
+                                        .keyboardType(.decimalPad)
+                                        .focused($isFocused)
+                                    answerCorrect ? Image(systemName: "checkmark") : Image(systemName: "xmark.app")
+                                }
+                                Button(action: {
+                                    self.isAnswerCorrect()
+                                    self.isFocused = false
+                                    self.questionCount += 1
+                                }, label: {
+                                    Text("Check answer")
+                                })
+                                .buttonStyle(.borderedProminent)
+                                
+                            }
+                            .frame(width: 200, height: 250)
+                            .background(LinearGradient(colors: [.black, .yellow, .yellow, .black], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .clipShape(.rect(cornerRadius: 20))
+                            
+                            Spacer()
+                        }
+                    }
+                }
+                Spacer()
             }
-            .onAppear(perform: startGame)
-            
-            
-            Text("\(score)")
+            Text("Your score: \(score)")
         }
-    }
-    
-    func startGame() {
-        score = 0
     }
     
     func isAnswerCorrect() {
         if answer == ((multiplicationTable + 2) * generateRandomNumber()) {
             score += 1
-            textAnswer = "Correct"
-            // answerCorrect = true
+            answerCorrect = true
         } else {
-            textAnswer = "Wrong"
+            answerCorrect = false
         }
     }
     
@@ -126,8 +125,8 @@ struct ContentView: View {
         return Int.random(in: 0...12)
     }
     
-    func askQuestion(firstNumber: Int, secondNumber: Int) -> String {
-        return "\(firstNumber) x \(secondNumber) "
+    func generateQuestion() -> String {
+        return "\(multiplicationTable + 2) x \(generateRandomNumber())"
     }
 }
 
