@@ -69,46 +69,51 @@ struct ContentView: View {
                     }
                 } else {
                     VStack {
-                        Text("Question n° \(questionCount)")
-                        
-                        HStack {
-                            Spacer()
+                        if questionCount <= numberOfQuestion {
+                            Text("Question n° \(questionCount)")
                             
-                            VStack(alignment: .center ,spacing: 15) {
-                                Text(question)
-                                    .font(.title)
-                                Text("=")
-                                    .font(.title)
-                                HStack {
-                                    TextField("Your answer", value: $answer, format: .number)
-                                        .background(Color.white)
-                                        .frame(width: 40)
-                                        .cornerRadius(10)
-                                        .keyboardType(.decimalPad)
-                                        .focused($isFocused)
-                                    answerCorrect ? Image(systemName: "checkmark") : Image(systemName: "xmark.app")
-                                }
-                                Button(action: {
-                                    self.isAnswerCorrect()
-                                    self.isFocused = false
-                                    self.questionCount += 1
-                                }, label: {
-                                    Text("Check answer")
-                                })
-                                .buttonStyle(.borderedProminent)
+                            HStack {
+                                Spacer()
                                 
+                                VStack(alignment: .center ,spacing: 15) {
+                                    Text(question)
+                                        .font(.title)
+                                    Text("=")
+                                        .font(.title)
+                                    HStack {
+                                        TextField("Your answer", value: $answer, format: .number)
+                                            .background(Color.white)
+                                            .frame(width: 40)
+                                            .cornerRadius(10)
+                                            .keyboardType(.decimalPad)
+                                            .focused($isFocused)
+                                        answerCorrect ? Image(systemName: "checkmark") : Image(systemName: "xmark.app")
+                                    }
+                                    Button(action: {
+                                        self.isAnswerCorrect()
+                                        self.isFocused = false
+                                        self.questionCount += 1
+                                        self.question = generateQuestion()
+                                    }, label: {
+                                        Text("Check answer")
+                                    })
+                                    .buttonStyle(.borderedProminent)
+                                    
+                                }
+                                .frame(width: 200, height: 250)
+                                .background(LinearGradient(colors: [.black, .yellow, .yellow, .black], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .clipShape(.rect(cornerRadius: 20))
+                                
+                                Spacer()
                             }
-                            .frame(width: 200, height: 250)
-                            .background(LinearGradient(colors: [.black, .yellow, .yellow, .black], startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .clipShape(.rect(cornerRadius: 20))
-                            
-                            Spacer()
+                        } else {
+                            Text("Your final score is \(score)")
                         }
                     }
                 }
                 Spacer()
             }
-            Text("Your score: \(score)")
+            Text(gameIsOn ? "Your score: \(score)" : "")
         }
     }
     
