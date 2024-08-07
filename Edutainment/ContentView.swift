@@ -60,7 +60,7 @@ struct ContentView: View {
                         Spacer()
                         Button {
                             withAnimation {
-                                gameIsOn.toggle()
+                                self.gameIsOn = true
                                 self.question = generateQuestion()
                             }
                         } label: {
@@ -96,14 +96,25 @@ struct ContentView: View {
                                         }
                                     }
                                     if isAnswerChecked {
-                                        Button(action: {
-                                            self.questionCount += 1
-                                            self.question = generateQuestion()
-                                            self.isAnswerChecked = false
-                                        }, label: {
-                                            Text("Next question")
-                                        })
-                                        .buttonStyle(.borderedProminent)
+                                        if questionCount == numberOfQuestion {
+                                            Button(action: {
+                                                self.questionCount += 1
+                                                self.question = generateQuestion()
+                                                self.isAnswerChecked = false
+                                            }, label: {
+                                                Text("Show final score")
+                                            })
+                                            .buttonStyle(.borderedProminent)
+                                        } else {
+                                            Button(action: {
+                                                self.questionCount += 1
+                                                self.question = generateQuestion()
+                                                self.isAnswerChecked = false
+                                            }, label: {
+                                                Text("Next question")
+                                            })
+                                            .buttonStyle(.borderedProminent)
+                                        }
                                     } else {
                                         Button(action: {
                                             self.isAnswerCorrect()
@@ -123,12 +134,21 @@ struct ContentView: View {
                             }
                         } else {
                             Text("Your final score is \(score)")
+                            
+                            Button(action: {
+                                self.restartGame()
+                            }, label: {
+                                Text("Restart game")
+                            })
+                            .buttonStyle(.borderedProminent)
                         }
                     }
                 }
                 Spacer()
             }
-            Text(gameIsOn ? "Your score: \(score)" : "")
+            if questionCount <= numberOfQuestion {
+                Text(gameIsOn ? "Your score: \(score)" : "")
+            }
         }
     }
     
@@ -149,6 +169,15 @@ struct ContentView: View {
     
     func generateQuestion() -> String {
         return "\(multiplicationTable + 2) x \(generateRandomNumber())"
+    }
+    
+    func restartGame() {
+        self.question = generateQuestion()
+        self.gameIsOn = false
+        self.score = 0
+        self.numberOfQuestion = 5
+        self.questionCount = 0
+        self.multiplicationTable = 1
     }
 }
 
